@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<title>Web VR boilerplate (Cardboard and Oculus)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<style>
+body {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background-color: #000;
+  color: #fff;
+  margin: 0px;
+  padding: 0;
+  overflow: hidden;
+}
+</style>
+</head>
+
+<body>
+
+</body>
+
+<!--
+  three.js 3d library
+  -->
+<script src="js/three.js"></script>
+
+<!--
+  VRControls.js acquires positional information from connected VR devices and applies the transformations to a three.js camera object.
+   -->
+<script src="js/VRControls.js"></script>
+
+<!--
+  VREffect.js handles stereo camera setup and rendering.
+  -->
+<script src="js/VREffect.js"></script>
+
+<!--
+  A polyfill for WebVR using the Device{Motion,Orientation}Event API.
+  -->
+<script src="js/webvr-polyfill.js"></script>
+
+<!--
+  Helps enter and exit VR mode, provides best practices while in VR.
+  -->
+<script src="js/webvr-manager.js"></script>
+
+
+<script>
+/*
+ * Debug parameters.
+ */
+
+// Enable distortion everywhere.
+//WEBVR_FORCE_DISTORTION = true;
+// Override the distortion background color.
+//WEBVR_BACKGROUND_COLOR = new THREE.Vector4(1, 0, 0, 1);
+// Change the tracking prediction mode.
+//WEBVR_PREDICTION_MODE = 2;
+// In prediction mode, change how far into the future to predict.
+//WEBVR_PREDICTION_TIME_MS = 100;
+</script>
+
+<script>
+//Setup three.js WebGL renderer
+var renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+
+// Append the canvas element created by the renderer to document body element.
+document.body.appendChild(renderer.domElement);
+
+// Create a three.js scene.
+var scene = new THREE.Scene();
+
+// Create a three.js camera.
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+
+
+camera.position.x = 0.52
+camera.position.y = 0.25
+camera.position.z = 5.3
+
+
+// Apply VR headset positional data to camera.
+var controls = new THREE.VRControls(camera);
+
+// Apply VR stereo rendering to renderer.
+var effect = new THREE.VREffect(renderer);
+effect.setSize(window.innerWidth, window.innerHeight);
+
+// Create a VR manager helper to enter and exit VR mode.
+var manager = new WebVRManager(renderer, effect, {hideButton: false});
+
+var xLocs = [-1, 0, 1, 2, 3, 4, 5];
+var yLocs = [-1, 0, 1, 2, 3, 4, 5];
+var zLocs = [-1, 0, 1, 2, 3, 4, 5];
+
+
+for(var x in xLocs){
+for(var y in yLocs){
+for(var z in zLocs){
+  
+  // Create 3D objects.
+  var geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+  var material = new THREE.MeshNormalMaterial();
+  var cube = new THREE.Mesh(geometry, material);
+
+  // Position cube mesh
+  cube.position.x = xLocs[x];
+  cube.position.y = yLocs[y];
+  cube.position.z = zLocs[z];
+
+  // Add cube mesh to your three.js scene
+  scene.add(cube);
+
+}}}
+
+
+
+
+for(var x in xLocs){
+for(var y in yLocs){
+
+
+  // Create 3D objects.
+  var geometry = new THREE.BoxGeometry(0.05, 0.05, 6.0);
+  var material = new THREE.MeshNormalMaterial();
+  var cube = new THREE.Mesh(geometry, material);
+
+  // Position cube mesh
+  cube.position.x = xLocs[x];
+  cube.position.y = yLocs[y];
+  cube.position.z = 2;
+
+  // Add cube mesh to your three.js scene
+  scene.add(cube);
+
+}}
+
+for(var x in xLocs){
+for(var z in zLocs){
+
+
+  // Create 3D objects.
+  var geometry = new THREE.BoxGeometry(0.05, 6.00, 0.05);
+  var material = new THREE.MeshNormalMaterial();
+  var cube = new THREE.Mesh(geometry, material);
+
+  // Position cube mesh
+  cube.position.x = xLocs[x];
+  cube.position.z = zLocs[z];
+  cube.position.y = 2;
+
+
+  // Add cube mesh to your three.js scene
+  scene.add(cube);
+
+}}
+
+for(var y in xLocs){
+for(var z in zLocs){
+
+  
+  // Create 3D objects.
+  var geometry = new THREE.BoxGeometry(6, 0.05, 0.05);
+  var material = new THREE.MeshNormalMaterial();
+  var cube = new THREE.Mesh(geometry, material);
+
+  // Position cube mesh
+  cube.position.y = yLocs[y];
+  cube.position.z = zLocs[z];
+  cube.position.x = 2;
+
+
+  // Add cube mesh to your three.js scene
+  scene.add(cube);
+
+}}
+
+
+
+
+
+// Also add a repeating grid as a skybox.
+var boxWidth = 20;
+var texture = THREE.ImageUtils.loadTexture(
+  'img/box.png'
+);
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set(boxWidth, boxWidth);
+
+var geometry = new THREE.BoxGeometry(boxWidth, boxWidth, boxWidth);
+var material = new THREE.MeshBasicMaterial({
+  map: texture,
+  color: 0xFFCD82,
+  side: THREE.BackSide
+});
+
+var skybox = new THREE.Mesh(geometry, material);
+scene.add(skybox);
+
+// Request animation frame loop function
+function animate(timestamp) {
+  // Apply rotation to cube mesh
+  //cube.rotation.y += 0.01;
+  camera.position.z -= 0.001;
+
+  // Update VR headset position and apply to camera.
+  controls.update();
+  
+  // orbitControls.update();
+  // vrControls.update();
+  //
+  // // Temporarily save the orbited camera position
+  // var orbitPos = camera.position.clone();
+  // // Apply the VR HMD camera position and rotation
+  // // on top of the orbited camera.
+  // var rotatedPosition = fakeCamera.position.applyQuaternion(camera.quaternion);
+  // camera.position.add(rotatedPosition);
+  // camera.quaternion.multiply(fakeCamera.quaternion);
+  
+  
+
+  // Render the scene through the manager.
+  manager.render(scene, camera, timestamp);
+
+  requestAnimationFrame(animate);
+}
+
+// Kick off animation loop
+animate();
+
+// Reset the position sensor when 'z' pressed.
+function onKey(event) {
+  if (event.keyCode == 90) { // z
+    controls.resetSensor();
+  }
+  
+  
+};
+
+window.addEventListener('keydown', onKey, true);
+
+// Handle window resizes
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  effect.setSize(window.innerWidth, window.innerHeight);
+}
+
+window.addEventListener('resize', onWindowResize, false);
+
+</script>
+
+</html>
